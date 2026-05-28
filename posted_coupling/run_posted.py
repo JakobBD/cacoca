@@ -1,4 +1,10 @@
+from dataclasses import dataclass, field
+
 import pandas as pd
+from cet_units import Q
+
+from posted import TEDF
+from team.tools import ProcessChain, calc_LCOX_pc, calc_GHGI_pc, calc_emissions
 
 from cacoca.setup.read_input import read_raw_scenario_data
 from cacoca.setup.select_scenario_data import select_prices
@@ -224,3 +230,157 @@ def team_to_cacoca(
     result[cost_cols] = result[cost_cols].fillna(0.0)
 
     return result
+
+
+# =============================================================================
+# ROUTE SPECIFICATION HELPERS
+# =============================================================================
+
+@dataclass
+class TEDFSpec:
+    """Specification for one technology in a route.
+
+    Parameters
+    ----------
+    process_name:
+        Short name used in the ProcessChain string and as variable prefix
+        (``Tech|{process_name}``).
+    tedf:
+        TEDF load path. Defaults to ``Tech|{process_name}``.
+    aggregate:
+        Extra keyword arguments forwarded to ``.aggregate()``.
+    calc_emissions:
+        If True, run ``calc_emissions`` after aggregation (requires
+        ``emi_factors`` to be passed to ``calc_posted_routes``).
+    """
+    process_name: str
+    tedf: str | None = None
+    aggregate: dict = field(default_factory=dict)
+    calc_emissions: bool = False
+
+
+@dataclass
+class RouteSpec:
+    """Full specification for a POSTED/TEAM route.
+
+    Parameters
+    ----------
+    name:
+        Route name, e.g. ``"BF-BOF"``.
+    chain:
+        ProcessChain diagram string passed to ``ProcessChain()``.
+    techs:
+        Ordered list of ``TEDFSpec`` objects making up the route.
+    func_process:
+        Process name for the functional unit (must match a name in ``techs``).
+    func_flow:
+        Flow name for the functional unit (``Q("1t")`` is assumed).
+    varcombine:
+        Template string for ``team.varcombine``, e.g.
+        ``"{route}-{carbon_capture}"``.
+    rename:
+        Column-level renames applied before ``varcombine``, e.g.
+        ``{"carbon_capture": {"No Capture": "Conv", "End-of-pipe": "CCS"}}``.
+    """
+    name: str
+    chain: str
+    techs: list
+    func_process: str
+    func_flow: str
+    varcombine: str = "{route}"
+    rename: dict = field(default_factory=dict)
+
+
+_VAR_UNITS = {"LCOX": "EUR_2024 / t", "GHGI": "t CO2eq / t"}
+
+
+def load_route_data(spec: RouteSpec, emi_factors=None) -> pd.DataFrame:
+    """Load and aggregate all TEDFs for a route spec."""
+    dfs = []
+    for tech in spec.techs:
+        tedf_path = tech.tedf or f"Tech|{tech.process_name}"
+        df = TEDF.load(tedf_path).aggregate(append_references=True, **tech.aggregate)
+        if tech.calc_emissions:
+            if emi_factors is None:
+                raise ValueError(
+                    f"emi_factors required for TEDFSpec '{tech.process_name}'"
+                    " with calc_emissions=True"
+                )
+            df = df.team.perform(calc_emissions, using=emi_factors, only_new=False)
+        prefix = f"Tech|{tech.process_name}"
+        df = df.assign(variable=lambda d, p=prefix: p + "|" + d["variable"])
+        dfs.append(df)
+    return pd.concat(dfs, ignore_index=True)
+
+
+def calc_posted_routes(
+    routes,
+    config: dict,
+    emi_factors=None,
+    extra_assumptions: pd.DataFrame | None = None,
+) -> pd.DataFrame:
+    """Run TEAM calculations for a list of RouteSpecs and return a CaCoCa
+    cost_and_em DataFrame.
+
+    Parameters
+    ----------
+    routes:
+        List of ``RouteSpec`` objects.
+    config:
+        CaCoCa config dict. Must contain ``default_wacc``, ``scenarios_dir``,
+        and ``scenarios_actual.prices``.
+    emi_factors:
+        Emission factors DataFrame, required for any tech with
+        ``calc_emissions=True``.
+    extra_assumptions:
+        Optional additional rows appended to TEAM assumptions (e.g. a
+        Biomethane price not covered by the scenario files).
+    """
+    interest_rate = config.get("default_wacc", 0.08)
+    book_lifetime = f"{config.get('book_lifetime', 25)} years"
+
+    base_assumptions = prices_from_config(config)
+    tech_assumptions = prices_from_config(config, include_ghg=False)
+    if extra_assumptions is not None:
+        base_assumptions = pd.concat(
+            [base_assumptions, extra_assumptions], ignore_index=True
+        )
+        tech_assumptions = pd.concat(
+            [tech_assumptions, extra_assumptions], ignore_index=True
+        )
+
+    dfs = []
+    for spec in routes:
+        tech_df = load_route_data(spec, emi_factors)
+        route = ProcessChain(spec.chain, name=spec.name)
+        reference = f"{spec.func_process}|{spec.func_flow}"
+        func_unit = {spec.func_process: {spec.func_flow: Q("1t")}}
+
+        df = (
+            tech_df
+            .team.perform(route.calc_scaling, func_unit=func_unit)
+            .team.perform_multi(
+                [
+                    dict(func=calc_GHGI_pc, name=spec.name, reference=reference),
+                    dict(func=calc_LCOX_pc, name=spec.name, reference=reference,
+                         interest_rate=interest_rate,
+                         book_lifetime=book_lifetime),
+                ],
+                using=tech_assumptions,
+                only_new=True,
+            )
+            .team.varsplit("?variable|?route|?process|*component")
+        )
+
+        for col, mapping in spec.rename.items():
+            df[col] = df[col].map(mapping)
+
+        df = (
+            df
+            .team.varcombine(spec.varcombine, var_col="route")
+            .team.unit_to(_VAR_UNITS)
+        )
+        dfs.append(df)
+
+    df_calc = pd.concat(dfs, ignore_index=True)
+    return team_to_cacoca(df_calc, base_assumptions, COMPONENT_MAP)

@@ -1,0 +1,22 @@
+default_wacc: 0.08
+book_lifetime: 25
+
+show_figures: true
+show_figs_in_browser: true
+save_figures: false
+crop_figures: true
+output_dir: output/
+
+scenarios_dir: data/scenarios/basic/
+scenarios_actual:
+  prices:
+    Electricity: '100 steady'
+    CO2: 'PIKExpertGuess-CO2'
+    Natural Gas: '40 steady'
+    Hydrogen: 'PIKExpertGuess-H2'
+    Coking Coal: '100 steady'
+    Injection Coal: '70 steady'
+    Iron Ore: 'Eisenerz Agora'
+    Scrap Steel: 'Zero_Dummy_Scrap'
+    DRI-Pellets: 'DRI-Pellets Agora'
+    Naphta: 'Naphta a)'
