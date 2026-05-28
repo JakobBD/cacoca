@@ -1,6 +1,0 @@
-Technology,Mode,Type,Component,Subcomponent,Region,Period,Usage,Value,Uncertainty,Unit,Non-unit conversion factor,Value and uncertainty comment,Source reference,Source comment
-Methanol to Gasoline,,High CAPEX,CAPEX,,,2025,,46.75,,USD_2005,,,Posted Tech|Methanol to Gasoline,
-Methanol to Gasoline,,Energy demand,Electricity,,,2025,,0.1099,,MWh,,,Posted Tech|Methanol to Gasoline,
-Methanol to Gasoline,,Energy demand,Hydrogen,,,2025,,0.03333,,MWh,,,Posted Tech|Methanol to Gasoline,
-Methanol to Gasoline,,Feedstock demand,Methanol,,,2025,,5.051,,MWh,,,Posted Tech|Methanol to Gasoline,
-Methanol to Gasoline,,OPEX,Additional OPEX,,,2025,,3.503,,USD_2005,,,Posted Tech|Methanol to Gasoline,

@@ -1,6 +1,0 @@
-Technology,Mode,Type,Component,Subcomponent,Region,Period,Usage,Value,Uncertainty,Unit,Non-unit conversion factor,Value and uncertainty comment,Source reference,Source comment
-Methanol to Kerosene,,High CAPEX,CAPEX,,,2025,,74.42,,USD_2005,,,Posted Tech|Methanol to Kerosene,
-Methanol to Kerosene,,Energy demand,Electricity,,,2025,,0.0163,,MWh,,,Posted Tech|Methanol to Kerosene,
-Methanol to Kerosene,,Energy demand,Hydrogen,,,2025,,0.024,,MWh,,,Posted Tech|Methanol to Kerosene,
-Methanol to Kerosene,,Feedstock demand,Methanol,,,2025,,1.2,,MWh,,,Posted Tech|Methanol to Kerosene,
-Methanol to Kerosene,,OPEX,Additional OPEX,,,2025,,4.74,,USD_2005,,,Posted Tech|Methanol to Kerosene,
