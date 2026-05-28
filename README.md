@@ -8,27 +8,32 @@ The techno-economic input data provided in this repository is incomplete and not
 
 The Python version and packages are managed using [PEP 621](https://peps.python.org/pep-0621/). Packages are listed in the file [pyproject.toml](pyproject.toml). Detailed instructions for installation can be found in the [documentation](doc/100_getting_started.md).
 
-## POSTED Coupling
-
-To use data from POSTED, it's data has to be added to the POSTED dependency. For this, the POSTED datafolder ´inst´ must be copied to ´.venv/Lib´ in CaCoCa. Then, simply run 
-
-```
-generate_cacoca_input_data.py
-```
-
-The POSTED data will be transformed to CaCoCa format and saved in data/tech/posted from where it can be used.
-
-## Quick start / basic run
+## Quick start
 
 Runs are configured using a YAML input file. Example input files are located in the `config` folder.
 
-For a test run, go to the main directory and run
-
+**Auction simulation** — multi-round bidding with budget caps:
 ```
 uv run python cacoca.py config/config.yml
 ```
 
-This should create some lines of stdout for the different auction rounds.
+**Cost/emissions analysis and plotting** — using CaCoCa's native tech data:
+```
+uv run python plot_slides.py
+```
+
+Both commands should be run from the repository root.
+
+## POSTED Coupling
+
+CaCoCa integrates with the [POSTED](https://github.com/PhilippVerpoort/posted) techno-economic database as an alternative data source. POSTED is installed automatically as a dependency via `uv sync`.
+
+To run an analysis using POSTED data:
+```
+uv run python posted_coupling/plot_slides_posted.py
+```
+
+Routes (technology chains) are defined in `config/posted_routes.yml`. Adding a new sector there is possible without any Python changes. The active config is `config/posted_config_slides.yml`.
 
 ## Contributors
 
