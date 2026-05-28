@@ -1,6 +1,7 @@
 """
 Steel LCOx analysis using POSTED + TEAM data, plotted with CaCoCa tools.
 
+Routes are defined in config/routes_posted.yml.
 Run from the cacoca project root:
     python posted_coupling/plot_slides_posted.py
 """
@@ -16,7 +17,7 @@ from cacoca.output.plot_stacked_bars import plot_stacked_bars_multi
 from cacoca.output.plot_price_scenarios import plot_price_scenarios
 from cacoca.output.plot_tools import change_output_subdir_by_filename
 
-from posted_coupling.run_posted import TEDFSpec, RouteSpec, calc_posted_routes
+from posted_coupling.run_posted import load_routes, calc_posted_routes
 
 
 # =============================================================================
@@ -46,59 +47,10 @@ extra_assumptions = pd.DataFrame.from_records([
 ])
 
 # =============================================================================
-# ROUTES
-# =============================================================================
-
-routes = [
-    RouteSpec(
-        name="BF-BOF",
-        chain="Int-BF-BOF -> Steel Hot-rolled Coil",
-        techs=[
-            TEDFSpec(
-                "Int-BF-BOF",
-                tedf="Tech|Integrated Blast Furnace and Basic Oxygen Furnace",
-                aggregate={
-                    "carbon_capture": ["No Capture", "End-of-pipe"],
-                    "units": {
-                        "Output Capacity|Steel Hot-rolled Coil": "t/yr",
-                        "Output|Steel Hot-rolled Coil": "t",
-                    },
-                },
-            ),
-        ],
-        func_process="Int-BF-BOF",
-        func_flow="Steel Hot-rolled Coil",
-        varcombine="{route}-{carbon_capture}",
-        rename={"carbon_capture": {"No Capture": "Conv", "End-of-pipe": "CCS"}},
-    ),
-    RouteSpec(
-        name="DR-EAF",
-        chain=(
-            "Direct Reduction of Iron -> Direct Reduced Iron => "
-            "Electric Arc Furnace -> Steel Liquid => "
-            "Steel Casting -> Steel Slab => "
-            "Steel Hot Rolling -> Steel Hot-rolled Coil"
-        ),
-        techs=[
-            TEDFSpec("Direct Reduction of Iron", calc_emissions=True),
-            TEDFSpec(
-                "Electric Arc Furnace",
-                aggregate={"mode": "Primary", "reheating": "w/o reheating"},
-                calc_emissions=True,
-            ),
-            TEDFSpec("Steel Casting", calc_emissions=True),
-            TEDFSpec("Steel Hot Rolling", calc_emissions=True),
-        ],
-        func_process="Steel Hot Rolling",
-        func_flow="Steel Hot-rolled Coil",
-        varcombine="{mode}-{route}",
-    ),
-]
-
-# =============================================================================
 # CALCULATION
 # =============================================================================
 
+routes = load_routes(config["routes_file"])
 cost_and_em = calc_posted_routes(routes, config, emi_factors, extra_assumptions)
 
 # =============================================================================
@@ -109,10 +61,9 @@ change_output_subdir_by_filename(config, __file__)
 
 plot_price_scenarios(types.SimpleNamespace(config=config))
 
-project_names = ["BF-BOF-Conv", "BF-BOF-CCS", "H2-DR-EAF"]
 plot_stacked_bars_multi(
     cost_and_em,
     config,
-    project_names=project_names,
+    project_names=config["project_names"],
     cost_per="product",
 )

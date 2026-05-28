@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+import yaml
 import pandas as pd
 from cet_units import Q
 
@@ -292,6 +293,38 @@ class RouteSpec:
 
 
 _VAR_UNITS = {"LCOX": "EUR_2024 / t", "GHGI": "t CO2eq / t"}
+
+
+def load_routes(routes_file: str) -> list:
+    """Load route specifications from a YAML file.
+
+    The file must contain a top-level ``routes`` mapping where each key is the
+    route name and the value is a dict with keys matching ``RouteSpec`` fields.
+    """
+    with open(routes_file) as f:
+        data = yaml.safe_load(f)
+
+    routes = []
+    for name, spec in data["routes"].items():
+        techs = [
+            TEDFSpec(
+                process_name=t["process_name"],
+                tedf=t.get("tedf"),
+                aggregate=t.get("aggregate", {}),
+                calc_emissions=t.get("calc_emissions", False),
+            )
+            for t in spec["techs"]
+        ]
+        routes.append(RouteSpec(
+            name=name,
+            chain=spec["chain"],
+            techs=techs,
+            func_process=spec["func_process"],
+            func_flow=spec["func_flow"],
+            varcombine=spec.get("varcombine", "{route}"),
+            rename=spec.get("rename", {}),
+        ))
+    return routes
 
 
 def load_route_data(spec: RouteSpec, emi_factors=None) -> pd.DataFrame:

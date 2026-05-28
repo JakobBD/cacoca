@@ -1,6 +1,12 @@
 default_wacc: 0.08
 book_lifetime: 25
 
+routes_file: config/routes_posted.yml
+project_names:
+  - BF-BOF-Conv
+  - BF-BOF-CCS
+  - H2-DR-EAF
+
 show_figures: true
 show_figs_in_browser: true
 save_figures: false

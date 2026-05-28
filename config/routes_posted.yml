@@ -1,0 +1,40 @@
+routes:
+  BF-BOF:
+    chain: "Int-BF-BOF -> Steel Hot-rolled Coil"
+    techs:
+      - process_name: "Int-BF-BOF"
+        tedf: "Tech|Integrated Blast Furnace and Basic Oxygen Furnace"
+        aggregate:
+          carbon_capture: ["No Capture", "End-of-pipe"]
+          units:
+            "Output Capacity|Steel Hot-rolled Coil": "t/yr"
+            "Output|Steel Hot-rolled Coil": "t"
+    func_process: "Int-BF-BOF"
+    func_flow: "Steel Hot-rolled Coil"
+    varcombine: "{route}-{carbon_capture}"
+    rename:
+      carbon_capture:
+        "No Capture": "Conv"
+        "End-of-pipe": "CCS"
+
+  DR-EAF:
+    chain: >-
+      Direct Reduction of Iron -> Direct Reduced Iron =>
+      Electric Arc Furnace -> Steel Liquid =>
+      Steel Casting -> Steel Slab =>
+      Steel Hot Rolling -> Steel Hot-rolled Coil
+    techs:
+      - process_name: "Direct Reduction of Iron"
+        calc_emissions: true
+      - process_name: "Electric Arc Furnace"
+        aggregate:
+          mode: "Primary"
+          reheating: "w/o reheating"
+        calc_emissions: true
+      - process_name: "Steel Casting"
+        calc_emissions: true
+      - process_name: "Steel Hot Rolling"
+        calc_emissions: true
+    func_process: "Steel Hot Rolling"
+    func_flow: "Steel Hot-rolled Coil"
+    varcombine: "{mode}-{route}"
