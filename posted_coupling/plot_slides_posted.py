@@ -24,7 +24,7 @@ from posted_coupling.run_posted import load_routes, calc_posted_routes
 # CONFIGURATION
 # =============================================================================
 
-config = read_config("config/config_slides_posted.yml")
+config = read_config("config/posted_config_slides.yml")
 
 ureg.define_flows(["H2", "NG", "CH4", "coal"])
 

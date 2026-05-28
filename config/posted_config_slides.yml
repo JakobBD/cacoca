@@ -1,7 +1,7 @@
 default_wacc: 0.08
 book_lifetime: 25
 
-routes_file: config/routes_posted.yml
+routes_file: config/posted_routes.yml
 project_names:
   - BF-BOF-Conv
   - BF-BOF-CCS
