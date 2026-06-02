@@ -1,7 +1,7 @@
 default_wacc: 0.08
 book_lifetime: 25
 
-routes_file: config/posted_routes.yml
+routes_file: config/posted_routes_steel.yml
 project_names:
   - BF-BOF-Conv
   - BF-BOF-CCS
@@ -9,9 +9,10 @@ project_names:
 
 show_figures: true
 show_figs_in_browser: true
-save_figures: false
+save_figures: true
 crop_figures: true
-output_dir: output/
+output_dir: output/plot_slides_posted
+filename_prefix: steel
 
 scenarios_dir: data/scenarios/basic/
 scenarios_actual:

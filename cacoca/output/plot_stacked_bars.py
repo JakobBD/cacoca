@@ -25,6 +25,7 @@ colors = {
     'Coking Coal': '#42032E',
     'Injection Coal': "#5E3360",
     'Coal': '#1A252F',                  # Generic coal (TEAM)
+    'Oxygen': '#8B4513',                # Saddle brown (TEAM)
     'Naphta': '#E67E22',
     'Biomass': '#229954',
     'Biomethane': '#1ABC9C',            # Teal (TEAM)

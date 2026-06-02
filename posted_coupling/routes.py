@@ -46,6 +46,7 @@ COMPONENT_MAP = {
     "Input Cost|Scrap Steel":   "Scrap Steel",
     "Input Cost|DRI-Pellets":   "DRI-Pellets",
     "Input Cost|Coal":          "Coal",
+    "Input Cost|Oxygen":        "Oxygen",
     "Input Cost|Biomethane":    "Biomethane",
     "Input Cost|Naphta":        "Naphta",
     "Input Cost|Biomass":       "Biomass",

@@ -45,6 +45,9 @@ def show_and_save(fig: pl.graph_objs.Figure, config: dict, base_name: str = None
         fig.show()
     if base_name and config['save_figures']:
         dir_path = config['output_dir']
+        filename_prefix = config.get('filename_prefix', '')
+        if filename_prefix:
+            base_name = f"{filename_prefix}_{base_name}"
         if config['crop_figures']:
             fig.update_layout(margin=dict(l=10, r=10, t=10, b=10), title='')
         fig.update_layout(width=1000, height=600, font=dict(size=18))

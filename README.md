@@ -33,7 +33,7 @@ To run an analysis using POSTED data:
 uv run python posted_coupling/plot_slides_posted.py
 ```
 
-Routes (technology chains) are defined in `config/posted_routes.yml`. Adding a new sector there is possible without any Python changes. The active config is `config/posted_config_slides.yml`.
+Routes (technology chains) are defined in product-specific route files such as `config/posted_routes_steel.yml` and `config/posted_routes_cement.yml`. The active configs are `config/posted_config_steel.yml` and `config/posted_config_cement.yml`.
 
 ## Contributors
 
