@@ -37,12 +37,21 @@ emi_factors = pd.concat([
          "value": 20.0, "unit": "g CO2eq / kWh"},
         {"variable": "Emission Factor|Hydrogen|Supply Chain",
          "value": 40.0, "unit": "g CO2eq / kWh_H2_LHV"},
+        {"variable": "Emission Factor|Heat", "value": 0.0, "unit": "g CO2eq / kWh"},
+        {"variable": "Emission Factor|Nitrogen", "value": 0.0, "unit": "kg CO2eq / t"},
+        {"variable": "Emission Factor|Lime", "value": 0.0, "unit": "kg CO2eq / t"},
+        {"variable": "Emission Factor|Alloys", "value": 0.0, "unit": "kg CO2eq / t"},
+        {"variable": "Emission Factor|Graphite Electrode", "value": 0.0, "unit": "kg CO2eq / t"},
+        {"variable": "Emission Factor|Steel Scrap", "value": 0.0, "unit": "kg CO2eq / t"},
+        {"variable": "Emission Factor|Iron Ore", "value": 0.0, "unit": "kg CO2eq / t"},
+        {"variable": "Emission Factor|Biomethane", "value": 0.0, "unit": "g CO2eq / kWh_NG_LHV"},
+        {"variable": "Emission Factor|Direct Reduced Iron", "value": 0.0, "unit": "kg CO2eq / t"},
+        {"variable": "Emission Factor|Steel Liquid", "value": 0.0, "unit": "kg CO2eq / t"},
+        {"variable": "Emission Factor|Steel Hot-rolled Coil", "value": 0.0, "unit": "kg CO2eq / t"},
     ]),
 ], ignore_index=True)
 
-extra_assumptions = pd.DataFrame.from_records([
-    {"variable": "Price|Biomethane", "value": 50.0, "unit": "EUR_2024/MWh_NG_LHV"},
-])
+extra_assumptions = None
 
 # =============================================================================
 # CALCULATION & PLOTTING FOR EACH CONFIG

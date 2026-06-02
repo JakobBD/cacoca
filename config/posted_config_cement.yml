@@ -10,7 +10,7 @@ project_names:
 
 show_figures: true
 show_figs_in_browser: true
-save_figures: true
+save_figures: false
 crop_figures: true
 output_dir: output/plot_slides_posted
 filename_prefix: cement
@@ -19,5 +19,6 @@ scenarios_dir: data/scenarios/basic/
 scenarios_actual:
   prices:
     Electricity: '100 steady'
+    Heat: '50 steady'
     CO2: 'PIKExpertGuess-CO2'
-    Injection Coal: '70 steady'
+    Coal: '100 steady'

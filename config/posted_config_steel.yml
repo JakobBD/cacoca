@@ -9,7 +9,7 @@ project_names:
 
 show_figures: true
 show_figs_in_browser: true
-save_figures: true
+save_figures: false
 crop_figures: true
 output_dir: output/plot_slides_posted
 filename_prefix: steel
@@ -18,12 +18,21 @@ scenarios_dir: data/scenarios/basic/
 scenarios_actual:
   prices:
     Electricity: '100 steady'
+    Heat: '50 steady'
     CO2: 'PIKExpertGuess-CO2'
     Natural Gas: '40 steady'
     Hydrogen: 'PIKExpertGuess-H2'
     Coking Coal: '100 steady'
     Injection Coal: '70 steady'
+    Coal: '100 steady'
     Iron Ore: 'Eisenerz Agora'
-    Scrap Steel: 'Zero_Dummy_Scrap'
-    DRI-Pellets: 'DRI-Pellets Agora'
+    Steel Scrap: 'Zero_Dummy_Scrap'
+    Direct Reduced Iron: 'DRI-Pellets Agora'
+    Nitrogen: '15 steady'
+    Lime: '20 steady'
+    Graphite Electrode: '3000 steady'
+    Alloys: '2000 steady'
+    Biomethane: '50 steady'
+    Steel Liquid: 'Zero_Dummy_SteelLiquid'
+    Steel Slab: 'Zero_Dummy_SteelSlab'
     Naphta: 'Naphta a)'

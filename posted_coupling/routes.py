@@ -11,20 +11,28 @@ from cacoca.setup.read_input import read_raw_scenario_data
 from cacoca.setup.select_scenario_data import select_prices
 
 
-# Mapping from CaCoCa price component names to TEAM variable names and units.
-# Only components listed here are passed to TEAM; others are silently skipped.
+# Mapping from CaCoCa price component names to TEAM (variable, unit) pairs.
 CACOCA_TO_TEAM_PRICE_MAP = {
-    "CO2":            ("GHG Price",             "EUR_2024/t CO2eq"),
-    "Electricity":    ("Price|Electricity",      "EUR_2024/MWh"),
-    "Hydrogen":       ("Price|Hydrogen",         "EUR_2024/kg_H2"),
-    "Natural Gas":    ("Price|Natural Gas",      "EUR_2024/MWh_NG_LHV"),
-    "Coking Coal":    ("Price|Coking Coal",      "EUR_2024/MWh_coal_LHV"),
-    "Injection Coal": ("Price|Injection Coal",   "EUR_2024/MWh_coal_LHV"),
-    "Iron Ore":       ("Price|Iron Ore",         "EUR_2024/t"),
-    "DRI-Pellets":    ("Price|DRI-Pellets",      "EUR_2024/t"),
-    "Scrap Steel":    ("Price|Scrap Steel",      "EUR_2024/t"),
-    "Naphta":         ("Price|Naphta",           "EUR_2024/MWh"),
-    "Biomass":        ("Price|Biomass",          "EUR_2024/MWh"),
+    "CO2":                 ("GHG Price",                "EUR_2024/t CO2eq"),
+    "Electricity":         ("Price|Electricity",        "EUR_2024/MWh"),
+    "Heat":                ("Price|Heat",               "EUR_2024/MWh"),
+    "Hydrogen":            ("Price|Hydrogen",           "EUR_2024/kg_H2"),
+    "Natural Gas":         ("Price|Natural Gas",        "EUR_2024/MWh_NG_LHV"),
+    "Coking Coal":         ("Price|Coking Coal",        "EUR_2024/MWh_coal_LHV"),
+    "Injection Coal":      ("Price|Injection Coal",     "EUR_2024/MWh_coal_LHV"),
+    "Coal":                ("Price|Coal",               "EUR_2024/MWh_coal_LHV"),
+    "Iron Ore":            ("Price|Iron Ore",           "EUR_2024/t"),
+    "Direct Reduced Iron": ("Price|Direct Reduced Iron", "EUR_2024/t"),
+    "Steel Scrap":         ("Price|Steel Scrap",        "EUR_2024/t"),
+    "Alloys":              ("Price|Alloys",             "EUR_2024/t"),
+    "Graphite Electrode":  ("Price|Graphite Electrode", "EUR_2024/t"),
+    "Lime":                ("Price|Lime",               "EUR_2024/t"),
+    "Nitrogen":            ("Price|Nitrogen",           "EUR_2024/t"),
+    "Biomethane":          ("Price|Biomethane",         "EUR_2024/MWh_NG_LHV"),
+    "Steel Liquid":        ("Price|Steel Liquid",       "EUR_2024/t"),
+    "Steel Slab":          ("Price|Steel Slab",         "EUR_2024/t"),
+    "Naphta":              ("Price|Naphta",             "EUR_2024/MWh"),
+    "Biomass":             ("Price|Biomass",            "EUR_2024/MWh"),
 }
 
 # Mapping from TEAM component names (after varsplit) to CaCoCa column names.
@@ -44,9 +52,22 @@ COMPONENT_MAP = {
     "Input Cost|Coking Coal":   "Coking Coal",
     "Input Cost|Injection Coal":"Injection Coal",
     "Input Cost|Scrap Steel":   "Scrap Steel",
+    "Input Cost|Steel Scrap":   "Scrap Steel",
     "Input Cost|DRI-Pellets":   "DRI-Pellets",
     "Input Cost|Coal":          "Coal",
     "Input Cost|Oxygen":        "Oxygen",
+    "Input Cost|Heat":          "Heat",
+    "Input Cost|Alloys":        "Alloys",
+    "Input Cost|Graphite Electrode": "Graphite Electrode",
+    "Input Cost|Lime":          "Lime",
+    "Input Cost|Nitrogen":      "Nitrogen",
+    "Input Cost|Water":         "Water",
+    "Input Cost|Direct Reduced Iron": "Direct Reduced Iron",
+    "Input Cost|Steel Liquid":  "Steel Liquid",
+    "Input Cost|Steel Slab":    "Steel Slab",
+    "Output Revenue|Steel Liquid": "Steel Liquid",
+    "Output Revenue|Steel Slab":   "Steel Slab",
+    "Output Revenue|Direct Reduced Iron": "Direct Reduced Iron",
     "Input Cost|Biomethane":    "Biomethane",
     "Input Cost|Naphta":        "Naphta",
     "Input Cost|Biomass":       "Biomass",
@@ -72,6 +93,12 @@ def prices_from_config(config: dict, include_ghg: bool = True) -> pd.DataFrame:
     """
     prices_raw, _, _, _ = read_raw_scenario_data(dirpath=config["scenarios_dir"])
     prices = select_prices(prices_raw, config["scenarios_actual"])
+    prices = prices.sort_values(["Component", "Period"]).copy()
+    prices["Price"] = (
+        prices
+        .groupby("Component", sort=False)["Price"]
+        .transform(lambda s: s.ffill().bfill())
+    )
     prices = prices.dropna(subset=["Price"])
 
     rows = []
@@ -79,17 +106,28 @@ def prices_from_config(config: dict, include_ghg: bool = True) -> pd.DataFrame:
         component = row["Component"]
         if component not in CACOCA_TO_TEAM_PRICE_MAP:
             continue
-        team_variable, team_unit = CACOCA_TO_TEAM_PRICE_MAP[component]
-        if not include_ghg and team_variable == "GHG Price":
+        variable, unit = CACOCA_TO_TEAM_PRICE_MAP[component]
+        if not include_ghg and variable == "GHG Price":
             continue
         rows.append({
-            "variable": team_variable,
+            "variable": variable,
             "value":    row["Price"],
-            "unit":     team_unit,
+            "unit":     unit,
             "period":   int(row["Period"]),
         })
 
-    return pd.DataFrame(rows)
+    assumptions = pd.DataFrame(rows)
+    if assumptions.empty:
+        return assumptions
+
+    # Guard against duplicate aliases/components mapping to the same TEAM key.
+    assumptions = (
+        assumptions
+        .sort_values(["variable", "period", "unit"])
+        .drop_duplicates(subset=["variable", "period", "unit"], keep="first")
+        .reset_index(drop=True)
+    )
+    return assumptions
 
 
 def team_to_cacoca(

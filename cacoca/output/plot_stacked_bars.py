@@ -20,12 +20,21 @@ colors = {
     'Iron Ore': '#A04000',
     'DRI-Pellets': "#C0703B",
     'Scrap Steel': "#68839E",
+    'Direct Reduced Iron': '#8D6E63',
+    'Steel Liquid': '#7F8FA6',
+    'Steel Slab': '#A4B0BE',
+    'Alloys': '#B5651D',
+    'Graphite Electrode': '#424242',
+    'Lime': '#CFCFC4',
+    'Nitrogen': '#5DADE2',
+    'Water': '#3498DB',
 
     # 3. ENERGY & CARBON INPUTS
     'Coking Coal': '#42032E',
     'Injection Coal': "#5E3360",
     'Coal': '#1A252F',                  # Generic coal (TEAM)
     'Oxygen': '#8B4513',                # Saddle brown (TEAM)
+    'Heat': '#F39C12',
     'Naphta': '#E67E22',
     'Biomass': '#229954',
     'Biomethane': '#1ABC9C',            # Teal (TEAM)
