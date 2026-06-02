@@ -28,9 +28,13 @@ def read_techdata(dir_path: str, filenames_base: list):
             os.path.join(dir_path, fnb + '.csv')
         ) for fnb in filenames_base
     ]
+    non_empty_techdata = []
     for df, fnb in zip(techdata, filenames_base):
+        if df.dropna(how='all').empty:
+            continue
         df.insert(0, "Industry", fnb, True)
-    techdata = pd.concat(techdata)
+        non_empty_techdata.append(df)
+    techdata = pd.concat(non_empty_techdata, ignore_index=True)
 
     reference_tech = pd.read_csv(
         os.path.join(dir_path, 'technology_reference_mapping.csv')
