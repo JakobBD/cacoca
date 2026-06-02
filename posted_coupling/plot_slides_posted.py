@@ -17,7 +17,7 @@ from cacoca.output.plot_stacked_bars import plot_stacked_bars_multi
 from cacoca.output.plot_price_scenarios import plot_price_scenarios
 from cacoca.output.plot_tools import change_output_subdir_by_filename
 
-from posted_coupling.run_posted import load_routes, calc_posted_routes
+from posted_coupling.routes import load_routes, calc_posted_routes
 
 
 # =============================================================================

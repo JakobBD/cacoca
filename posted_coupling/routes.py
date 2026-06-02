@@ -130,7 +130,7 @@ def team_to_cacoca(
     if len(unknown) > 0:
         raise ValueError(
             f"TEAM components not found in component_map: {sorted(unknown)}\n"
-            "Add them to COMPONENT_MAP in run_posted.py and to the colors dict in "
+            "Add them to COMPONENT_MAP in routes.py and to the colors dict in "
             "cacoca/output/plot_stacked_bars.py."
         )
 
