@@ -17,16 +17,16 @@ filename_prefix: steel
 scenarios_dir: data/scenarios/basic/
 scenarios_actual:
   prices:
-    Electricity: '100 steady'
+    Electricity: 'OL_scrap_base_elec'
     Heat: '50 steady'
     CO2: 'PIKExpertGuess-CO2'
-    Natural Gas: '40 steady'
-    Hydrogen: 'PIKExpertGuess-H2'
-    Coking Coal: '100 steady'
-    Injection Coal: '70 steady'
+    Natural Gas: 'OL_scrap_base_ngas'
+    Hydrogen: 'OL_scrap_base_hy'
+    Coking Coal: 'OL_scrap_base_ccoal'
+    Injection Coal: 'OL_scrap_base_icoal'
     Coal: '100 steady'
-    Iron Ore: 'Eisenerz Agora'
-    Steel Scrap: 'Zero_Dummy_Scrap'
+    Iron Ore: 'OL_scrap_base_iore'
+    Steel Scrap: 'OL_scrap_base_scrap'
     Direct Reduced Iron: 'DRI-Pellets Agora'
     Nitrogen: '15 steady'
     Lime: '20 steady'
@@ -36,3 +36,4 @@ scenarios_actual:
     Steel Liquid: 'Zero_Dummy_SteelLiquid'
     Steel Slab: 'Zero_Dummy_SteelSlab'
     Naphta: 'Naphta a)'
+    Biomass: 'OL_scrap_base_biomass'

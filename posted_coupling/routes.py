@@ -13,17 +13,17 @@ from cacoca.setup.select_scenario_data import select_prices
 
 # Mapping from CaCoCa price component names to TEAM (variable, unit) pairs.
 CACOCA_TO_TEAM_PRICE_MAP = {
-    "CO2":                 ("GHG Price",                "EUR_2024/t CO2eq"),
+    "CO2":                 ("GHG Price",                "EUR_2024/(t CO2eq)"),
     "Electricity":         ("Price|Electricity",        "EUR_2024/MWh"),
     "Heat":                ("Price|Heat",               "EUR_2024/MWh"),
     "Hydrogen":            ("Price|Hydrogen",           "EUR_2024/kg_H2"),
     "Natural Gas":         ("Price|Natural Gas",        "EUR_2024/MWh_NG_LHV"),
-    "Coking Coal":         ("Price|Coking Coal",        "EUR_2024/MWh_coal_LHV"),
-    "Injection Coal":      ("Price|Injection Coal",     "EUR_2024/MWh_coal_LHV"),
-    "Coal":                ("Price|Coal",               "EUR_2024/MWh_coal_LHV"),
+    "Coking Coal":         ("Price|Coking Coal",        "EUR_2024/t"),
+    "Injection Coal":      ("Price|Injection Coal",     "EUR_2024/t"),
+    "Coal":                ("Price|Coal",               "EUR_2024/t_coal"),
     "Iron Ore":            ("Price|Iron Ore",           "EUR_2024/t"),
     "Direct Reduced Iron": ("Price|Direct Reduced Iron", "EUR_2024/t"),
-    "Steel Scrap":         ("Price|Steel Scrap",        "EUR_2024/t"),
+    "Scrap Steel":         ("Price|Steel Scrap",        "EUR_2024/t"),
     "Alloys":              ("Price|Alloys",             "EUR_2024/t"),
     "Graphite Electrode":  ("Price|Graphite Electrode", "EUR_2024/t"),
     "Lime":                ("Price|Lime",               "EUR_2024/t"),
@@ -31,8 +31,8 @@ CACOCA_TO_TEAM_PRICE_MAP = {
     "Biomethane":          ("Price|Biomethane",         "EUR_2024/MWh_NG_LHV"),
     "Steel Liquid":        ("Price|Steel Liquid",       "EUR_2024/t"),
     "Steel Slab":          ("Price|Steel Slab",         "EUR_2024/t"),
-    "Naphta":              ("Price|Naphta",             "EUR_2024/MWh"),
-    "Biomass":             ("Price|Biomass",            "EUR_2024/MWh"),
+    "Naphta":              ("Price|Naphta",             "EUR_2024/t"),
+    "Biomass":             ("Price|Biomass",            "EUR_2024/t"),
 }
 
 # Mapping from TEAM component names (after varsplit) to CaCoCa column names.
@@ -74,6 +74,55 @@ COMPONENT_MAP = {
 }
 
 
+def _validate_team_price_scenarios(
+    prices_raw: pd.DataFrame,
+    configured_prices: dict,
+    include_ghg: bool,
+) -> None:
+    """Validate that configured scenario names exist for TEAM-coupled components.
+
+    Raises a ValueError listing all invalid component/scenario pairs.
+    """
+    missing_pairs = []
+    for component, scenario in configured_prices.items():
+        if component not in CACOCA_TO_TEAM_PRICE_MAP:
+            continue
+
+        variable, _ = CACOCA_TO_TEAM_PRICE_MAP[component]
+        if not include_ghg and variable == "GHG Price":
+            continue
+
+        is_present = (
+            (prices_raw["Component"] == component)
+            & (prices_raw["Scenario"] == scenario)
+        ).any()
+        if not is_present:
+            available = sorted(
+                prices_raw.loc[
+                    prices_raw["Component"] == component,
+                    "Scenario",
+                ]
+                .dropna()
+                .unique()
+                .tolist()
+            )
+            missing_pairs.append((component, scenario, available))
+
+    if missing_pairs:
+        details = "\n".join(
+            (
+                f"- {component!r}: configured scenario {scenario!r} not found. "
+                f"Available: {available}"
+            )
+            for component, scenario, available in missing_pairs
+        )
+        raise ValueError(
+            "Invalid scenario selection in config['scenarios_actual']['prices'] "
+            "for TEAM-coupled components:\n"
+            + details
+        )
+
+
 def prices_from_config(config: dict, include_ghg: bool = True) -> pd.DataFrame:
     """
     Load CaCoCa price scenarios selected by config['scenarios_actual'] and convert
@@ -92,6 +141,14 @@ def prices_from_config(config: dict, include_ghg: bool = True) -> pd.DataFrame:
     Components not in CACOCA_TO_TEAM_PRICE_MAP are silently ignored.
     """
     prices_raw, _, _, _ = read_raw_scenario_data(dirpath=config["scenarios_dir"])
+
+    configured_prices = config["scenarios_actual"]["prices"]
+    _validate_team_price_scenarios(
+        prices_raw=prices_raw,
+        configured_prices=configured_prices,
+        include_ghg=include_ghg,
+    )
+
     prices = select_prices(prices_raw, config["scenarios_actual"])
     prices = prices.sort_values(["Component", "Period"]).copy()
     prices["Price"] = (

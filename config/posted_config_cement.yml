@@ -17,8 +17,13 @@ filename_prefix: cement
 
 scenarios_dir: data/scenarios/basic/
 scenarios_actual:
+  free_allocations: 'base_allocation'
   prices:
-    Electricity: '100 steady'
+    Electricity: 'EEX Jahresfuture_DE'
     Heat: '50 steady'
     CO2: 'PIKExpertGuess-CO2'
     Coal: '100 steady'
+    Nitrogen: '15 steady'
+    Lime: '20 steady'
+    Biomethane: '50 steady'
+    Biomass: 'OL_scrap_base_biomass'
