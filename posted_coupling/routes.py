@@ -38,6 +38,7 @@ CACOCA_TO_TEAM_PRICE_MAP = {
     "Steel Hot-rolled Coil": ("Price|Steel Hot-rolled Coil", "EUR_2024/t"),
     "Naphta":              ("Price|Naphta",             "EUR_2024/t"),
     "Biomass":             ("Price|Biomass",            "EUR_2024/t"),
+    "Cement":              ("Price|Cement",             "EUR_2024/t"),
 }
 
 # Mapping from TEAM component names (after varsplit) to CaCoCa column names.
@@ -75,6 +76,8 @@ COMPONENT_MAP = {
     "Output Revenue|Steel Hot-rolled Coil": "Steel Hot-rolled Coil",
     "Output Revenue|Captured CO2": "Captured CO2",
     "Output Revenue|Direct Reduced Iron": "Direct Reduced Iron",
+    "Output Revenue|Electricity":  "Electricity",
+    "Output Revenue|Cement":     "Cement",
     "Input Cost|Biomethane":    "Biomethane",
     "Input Cost|Naphta":        "Naphta",
     "Input Cost|Biomass":       "Biomass",
@@ -259,8 +262,9 @@ def team_to_cacoca(
                 index=["route", "period"],
                 columns="component_mapped",
                 values="value",
-                fill_value=0.0,
             )
+            .apply(pd.to_numeric, errors="coerce")
+            .fillna(0.0)
             .infer_objects(copy=False)
             .reset_index()
         )
@@ -278,8 +282,9 @@ def team_to_cacoca(
                 index=["route", "period"],
                 columns="component_mapped",
                 values="value",
-                fill_value=0.0,
             )
+            .apply(pd.to_numeric, errors="coerce")
+            .fillna(0.0)
             .infer_objects(copy=False)
             .reset_index()
         )

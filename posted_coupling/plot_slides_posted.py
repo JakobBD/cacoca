@@ -70,7 +70,7 @@ for product in ['steel', 'cement']:
         routes = load_routes(config["routes_file"])
         cost_and_em = calc_posted_routes(routes, config, emi_factors, extra_assumptions)
         
-        plot_price_scenarios(types.SimpleNamespace(config=config))
+        # plot_price_scenarios(types.SimpleNamespace(config=config))
         
         plot_stacked_bars_multi(
             cost_and_em,

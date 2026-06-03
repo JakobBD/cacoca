@@ -20,10 +20,8 @@ scenarios_actual:
   free_allocations: 'base_allocation'
   prices:
     Electricity: 'EEX Jahresfuture_DE'
-    Heat: '50 steady'
     CO2: 'PIKExpertGuess-CO2'
     Coal: '100 steady'
-    Nitrogen: '15 steady'
-    Lime: '20 steady'
-    Biomethane: '50 steady'
-    Biomass: 'OL_scrap_base_biomass'
+    Oxygen: '20 steady'
+    Captured CO2: 'Zero_Dummy_CapturedCO2'
+    Cement: 'Zero_Dummy_Cement'

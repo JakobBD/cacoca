@@ -29,6 +29,7 @@ scenarios_actual:
     Scrap Steel: 'OL_scrap_base_scrap'
     Direct Reduced Iron: 'DRI-Pellets Agora'
     Nitrogen: '15 steady'
+    Oxygen: '20 steady'
     Water: '1 steady'
     Lime: '20 steady'
     Graphite Electrode: '3000 steady'
