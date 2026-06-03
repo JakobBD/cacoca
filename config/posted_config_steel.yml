@@ -16,6 +16,7 @@ filename_prefix: steel
 
 scenarios_dir: data/scenarios/basic/
 scenarios_actual:
+  free_allocations: 'base_allocation'
   prices:
     Electricity: 'OL_scrap_base_elec'
     Heat: '50 steady'

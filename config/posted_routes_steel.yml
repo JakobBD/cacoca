@@ -1,5 +1,6 @@
 routes:
   BF-BOF:
+    free_allocations_technology: "BF_BOF_reference"
     chain: "Int-BF-BOF -> Steel Hot-rolled Coil"
     techs:
       - process_name: "Int-BF-BOF"
@@ -18,6 +19,7 @@ routes:
         "End-of-pipe": "CCS"
 
   DR-EAF:
+    free_allocations_technology: "Scrap0_DRI100"
     chain: >-
       Direct Reduction of Iron -> Direct Reduced Iron =>
       Electric Arc Furnace -> Steel Liquid =>

@@ -8,7 +8,7 @@ from posted import TEDF
 from team.tools import ProcessChain, calc_LCOX_pc, calc_GHGI_pc, calc_emissions
 
 from cacoca.setup.read_input import read_raw_scenario_data
-from cacoca.setup.select_scenario_data import select_prices
+from cacoca.setup.select_scenario_data import select_prices, select_free_allocations
 
 
 # Mapping from CaCoCa price component names to TEAM (variable, unit) pairs.
@@ -201,6 +201,8 @@ def team_to_cacoca(
     df_calc: pd.DataFrame,
     assumptions: pd.DataFrame,
     component_map: dict = None,
+    free_allocations: pd.DataFrame | None = None,
+    route_to_fa_tech: dict | None = None,
 ) -> pd.DataFrame:
     """
     Convert TEAM calculation output to the cost_and_em DataFrame format expected by
@@ -332,7 +334,21 @@ def team_to_cacoca(
         .merge(co2_price, on="Period", how="left")
     )
 
-    result["Free Allocations"] = 0.0
+    if free_allocations is not None and route_to_fa_tech:
+        result["_fa_tech"] = result["Project name"].map(route_to_fa_tech)
+        fa_lookup = result[["_fa_tech", "Period"]].merge(
+            free_allocations.rename(columns={"Technology": "_fa_tech"}),
+            on=["_fa_tech", "Period"],
+            how="left",
+        )
+        result["Free Allocations"] = (
+            pd.to_numeric(fa_lookup["Free Allocations"], errors="coerce")
+            .fillna(0.0)
+            .values
+        )
+        result = result.drop(columns=["_fa_tech"])
+    else:
+        result["Free Allocations"] = 0.0
 
     # Fill any remaining NaN cost columns with 0
     cost_cols = [c for c in result.columns if c.startswith("cost_")]
@@ -398,6 +414,7 @@ class RouteSpec:
     func_flow: str
     varcombine: str = "{route}"
     rename: dict = field(default_factory=dict)
+    free_allocations_technology: str | None = None
 
 
 _VAR_UNITS = {"LCOX": "EUR_2024 / t", "GHGI": "t CO2eq / t"}
@@ -431,8 +448,23 @@ def load_routes(routes_file: str) -> list:
             func_flow=spec["func_flow"],
             varcombine=spec.get("varcombine", "{route}"),
             rename=spec.get("rename", {}),
+            free_allocations_technology=spec.get("free_allocations_technology"),
         ))
     return routes
+
+
+def free_allocations_from_config(config: dict) -> pd.DataFrame | None:
+    """Load and filter free allocations from the scenario data directory.
+
+    Returns a DataFrame with columns [Technology, Period, Free Allocations],
+    or None if no free_allocations scenario is configured.
+    """
+    scenario = config.get("scenarios_actual", {}).get("free_allocations", "")
+    if not scenario:
+        return None
+    _, fa_raw, _, _ = read_raw_scenario_data(config["scenarios_dir"])
+    fa = select_free_allocations(fa_raw, {"free_allocations": scenario})
+    return fa[["Technology", "Period", "Free Allocations"]]
 
 
 def load_route_data(spec: RouteSpec, emi_factors=None) -> pd.DataFrame:
@@ -490,6 +522,9 @@ def calc_posted_routes(
             [tech_assumptions, extra_assumptions], ignore_index=True
         )
 
+    free_allocations = free_allocations_from_config(config)
+    route_fa_map = {}
+
     dfs = []
     for spec in routes:
         tech_df = load_route_data(spec, emi_factors)
@@ -516,12 +551,16 @@ def calc_posted_routes(
         for col, mapping in spec.rename.items():
             df[col] = df[col].map(mapping)
 
-        df = (
-            df
-            .team.varcombine(spec.varcombine, var_col="route")
-            .team.unit_to(_VAR_UNITS)
-        )
+        df = df.team.varcombine(spec.varcombine, var_col="route")
+        if spec.free_allocations_technology:
+            for rname in df["route"].unique():
+                route_fa_map[rname] = spec.free_allocations_technology
+        df = df.team.unit_to(_VAR_UNITS)
         dfs.append(df)
 
     df_calc = pd.concat(dfs, ignore_index=True)
-    return team_to_cacoca(df_calc, base_assumptions, COMPONENT_MAP)
+    return team_to_cacoca(
+        df_calc, base_assumptions, COMPONENT_MAP,
+        free_allocations=free_allocations,
+        route_to_fa_tech=route_fa_map,
+    )
