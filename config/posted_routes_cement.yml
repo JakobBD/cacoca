@@ -1,0 +1,17 @@
+routes:
+  Cement:
+    chain: "Cement Plant -> Cement"
+    techs:
+      - process_name: "Cement Plant"
+        tedf: "Tech|Cement Plant"
+        aggregate:
+          carbon_capture: ["No Capture", "Tail-end 20%", "Tail-end 50%", "Integrated CaL"]
+    func_process: "Cement Plant"
+    func_flow: "Cement"
+    varcombine: "{route}-{carbon_capture}"
+    rename:
+      carbon_capture:
+        "No Capture": "Baseline"
+        "Tail-end 20%": "Tail20"
+        "Tail-end 50%": "Tail50"
+        "Integrated CaL": "IntCaL"

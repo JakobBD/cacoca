@@ -1,0 +1,44 @@
+default_wacc: 0.08
+book_lifetime: 25
+
+routes_file: config/posted_routes_steel.yml
+project_names:
+  - BF-BOF-Conv
+  - BF-BOF-CCS
+  - H2-DR-EAF
+
+show_figures: true
+show_figs_in_browser: true
+save_figures: true
+crop_figures: true
+output_dir: output/plot_slides_posted
+filename_prefix: steel
+
+scenarios_dir: data/scenarios/basic/
+scenarios_actual:
+  free_allocations: 'base_allocation'
+  prices:
+    Electricity: 'OL_scrap_base_elec'
+    Heat: '50 steady'
+    CO2: 'PIKExpertGuess-CO2'
+    Natural Gas: 'OL_scrap_base_ngas'
+    Hydrogen: 'OL_scrap_base_hy'
+    Coking Coal: 'OL_scrap_base_ccoal'
+    Injection Coal: 'OL_scrap_base_icoal'
+    Coal: '100 steady'
+    Iron Ore: 'OL_scrap_base_iore'
+    Scrap Steel: 'OL_scrap_base_scrap'
+    Direct Reduced Iron: 'DRI-Pellets Agora'
+    Nitrogen: '15 steady'
+    Oxygen: '20 steady'
+    Water: '1 steady'
+    Lime: '20 steady'
+    Graphite Electrode: '3000 steady'
+    Alloys: '2000 steady'
+    Biomethane: '50 steady'
+    Captured CO2: 'Zero_Dummy_CapturedCO2'
+    Steel Liquid: 'Zero_Dummy_SteelLiquid'
+    Steel Slab: 'Zero_Dummy_SteelSlab'
+    Steel Hot-rolled Coil: 'Zero_Dummy_HRC'
+    Naphta: 'Naphta a)'
+    Biomass: 'OL_scrap_base_biomass'

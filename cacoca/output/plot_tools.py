@@ -1,6 +1,18 @@
 import plotly as pl
 import pandas as pd
 import os
+import sys
+
+if sys.platform == "win32":
+    try:
+        import kaleido as _kaleido
+        _kaleido_exec_dir = os.path.join(
+            os.path.dirname(_kaleido.__file__), "executable"
+        )
+        if os.path.isdir(_kaleido_exec_dir):
+            os.environ["PATH"] = _kaleido_exec_dir + os.pathsep + os.environ.get("PATH", "")
+    except ImportError:
+        pass
 
 
 # define colors to use
@@ -26,9 +38,15 @@ def get_color(variables: list):
 
 
 def set_yrange_min_zero(fig: pl.graph_objs.Figure):
-    yrange = list(fig.full_figure_for_development(warn=False).layout.yaxis.range)
-    yrange[0] = min(yrange[0], -0.04 * yrange[1])
-    yrange[1] = max(yrange[1], 1.04 * yrange[1])
+    all_y = [
+        v for trace in fig.data
+        if hasattr(trace, 'y') and trace.y is not None
+        for v in trace.y if v is not None
+    ]
+    if not all_y:
+        return
+    ymax = max(all_y)
+    yrange = [-0.04 * ymax, 1.04 * ymax]
     fig.update_yaxes(range=yrange)
 
 
@@ -39,6 +57,9 @@ def show_and_save(fig: pl.graph_objs.Figure, config: dict, base_name: str = None
         fig.show()
     if base_name and config['save_figures']:
         dir_path = config['output_dir']
+        filename_prefix = config.get('filename_prefix', '')
+        if filename_prefix:
+            base_name = f"{filename_prefix}_{base_name}"
         if config['crop_figures']:
             fig.update_layout(margin=dict(l=10, r=10, t=10, b=10), title='')
         fig.update_layout(width=1000, height=600, font=dict(size=18))
@@ -79,6 +100,14 @@ display_names = {
     'H2 Share': 'Anteil Wasserstoff',
     'all_projects': 'Alle Projekte',
     'CO2 Cost': 'CO₂ Emissionskosten (ETS)',
+    'OM Fixed': 'Sonstige OPEX (fix)',
+    'OM Variable': 'Sonstige OPEX (variabel)',
+    'Coal': 'Kohle',
+    'Biomethane': 'Biomethan',
+    'DRI-Pellets': 'DRI-Pellets',
+    'BF-BOF-Conv': 'BF-BOF konventionell',
+    'BF-BOF-CCS': 'BF-BOF mit CCS',
+    'H2-DR-EAF': 'H₂-DR-EAF',
     '': '',
     '': ''
 }

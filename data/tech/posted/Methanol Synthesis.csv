@@ -1,7 +1,0 @@
-Technology,Mode,Type,Component,Subcomponent,Region,Period,Usage,Value,Uncertainty,Unit,Non-unit conversion factor,Value and uncertainty comment,Source reference,Source comment
-Methanol Synthesis,,High CAPEX,CAPEX,,,2025,,62.02,,USD_2005,,,Posted Tech|Methanol Synthesis,
-Methanol Synthesis,,Emissions,CO2,,,2025,,0.01012,,t,,,Posted Tech|Methanol Synthesis,
-Methanol Synthesis,,Feedstock demand,Captured CO2,,,2025,,0.2557,,t,,,Posted Tech|Methanol Synthesis,
-Methanol Synthesis,,Energy demand,Electricity,,,2025,,0.09012,,MWh,,,Posted Tech|Methanol Synthesis,
-Methanol Synthesis,,Energy demand,Hydrogen,,,2025,,1.173,,MWh,,,Posted Tech|Methanol Synthesis,
-Methanol Synthesis,,OPEX,Additional OPEX,,,2025,,6.207,,USD_2005,,,Posted Tech|Methanol Synthesis,

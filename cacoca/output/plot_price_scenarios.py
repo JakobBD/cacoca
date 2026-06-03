@@ -69,7 +69,7 @@ def plot_scenarios(prices: pd.DataFrame, config: dict, print_prefix: str,
                     is_emphasized = scenario_name in highlighted_scenarios
                 else:
                     is_emphasized = \
-                        config['scenarios_actual']['prices'][component_name] == scenario_name
+                        config['scenarios_actual']['prices'].get(component_name) == scenario_name
                 emphasize = 'main' if is_emphasized else 'other'
 
             if emphasize == 'other' and not print_other:

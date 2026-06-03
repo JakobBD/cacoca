@@ -1,9 +1,0 @@
-Technology,Mode,Type,Component,Subcomponent,Region,Period,Usage,Value,Uncertainty,Unit,Non-unit conversion factor,Value and uncertainty comment,Source reference,Source comment
-HT-DAC,,High CAPEX,CAPEX,,,2025,,2384.0,,USD_2005,,,Posted Tech|Direct Air Capture,
-HT-DAC,,Energy demand,Electricity,,,2025,,0.8104,,MWh,,,Posted Tech|Direct Air Capture,
-HT-DAC,,Energy demand,Heat,,,2025,,2.085,,MWh,,,Posted Tech|Direct Air Capture,
-LT-DAC,,High CAPEX,CAPEX,,,2025,,588.3,,USD_2005,,,Posted Tech|Direct Air Capture,
-LT-DAC,,Energy demand,Electricity,,,2025,,1.033,,MWh,,,Posted Tech|Direct Air Capture,
-LT-DAC,,Energy demand,Heat,,,2025,,2.514,,MWh,,,Posted Tech|Direct Air Capture,
-HT-DAC,,OPEX,Additional OPEX,,,2025,,136.98,,USD_2005,,,Posted Tech|Direct Air Capture,
-LT-DAC,,OPEX,Additional OPEX,,,2025,,60.14,,USD_2005,,,Posted Tech|Direct Air Capture,

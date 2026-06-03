@@ -1,6 +1,0 @@
-Technology,Mode,Type,Component,Subcomponent,Region,Period,Usage,Value,Uncertainty,Unit,Non-unit conversion factor,Value and uncertainty comment,Source reference,Source comment
-Urea Synthesis,,High CAPEX,CAPEX,,,2025,,2786.0,,USD_2005,,,Posted Tech|Urea Synthesis,
-Urea Synthesis,,Feedstock demand,Ammonia,,,2025,,0.575,,t,,,Posted Tech|Urea Synthesis,
-Urea Synthesis,,Feedstock demand,Captured CO2,,,2025,,0.7442,,t,,,Posted Tech|Urea Synthesis,
-Urea Synthesis,,Energy demand,Electricity,,,2025,,0.1484,,MWh,,,Posted Tech|Urea Synthesis,
-Urea Synthesis,,Energy demand,Heat,,,2025,,0.9319,,MWh,,,Posted Tech|Urea Synthesis,
