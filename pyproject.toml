@@ -18,6 +18,7 @@ dependencies = [
   "pyyaml >=6.0,<7.0",
   "kaleido ==0.1.0",
   "posted",
+  "team",
 ]
 
 [project.optional-dependencies]
@@ -25,3 +26,4 @@ dev = ["ipykernel >=6.22.0,<7.0.0"]
 
 [tool.uv.sources]
 posted = { git = "https://github.com/PhilippVerpoort/posted" }
+team = { git = "https://github.com/PhilippVerpoort/team.git" }
