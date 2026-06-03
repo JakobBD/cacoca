@@ -47,6 +47,7 @@ emi_factors = pd.concat([
         {"variable": "Emission Factor|Biomethane", "value": 0.0, "unit": "g CO2eq / kWh_NG_LHV"},
         {"variable": "Emission Factor|Direct Reduced Iron", "value": 0.0, "unit": "kg CO2eq / t"},
         {"variable": "Emission Factor|Steel Liquid", "value": 0.0, "unit": "kg CO2eq / t"},
+        {"variable": "Emission Factor|Steel Slab", "value": 0.0, "unit": "kg CO2eq / t"},
         {"variable": "Emission Factor|Steel Hot-rolled Coil", "value": 0.0, "unit": "kg CO2eq / t"},
     ]),
 ], ignore_index=True)

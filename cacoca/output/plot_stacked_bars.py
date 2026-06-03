@@ -23,11 +23,13 @@ colors = {
     'Direct Reduced Iron': '#8D6E63',
     'Steel Liquid': '#7F8FA6',
     'Steel Slab': '#A4B0BE',
+    'Steel Hot-rolled Coil': '#BCC7D4',
     'Alloys': '#B5651D',
     'Graphite Electrode': '#424242',
     'Lime': '#CFCFC4',
     'Nitrogen': '#5DADE2',
     'Water': '#3498DB',
+    'Captured CO2': '#16A085',
 
     # 3. ENERGY & CARBON INPUTS
     'Coking Coal': '#42032E',
