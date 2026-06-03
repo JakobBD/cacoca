@@ -1,3 +1,4 @@
+import os
 import plotly as pl
 import pandas as pd
 import numpy as np
@@ -5,28 +6,32 @@ from .plot_tools import show_and_save
 from .plot_tools import display_name as dn
 
 
-# The dict also prescribes the ordering in the plot (from bottom to top):
-# CAPEX, OPEX, non-energy feedstock, energy carriers, CO2 price
+# The dict prescribes colors and ordering in the plot (from bottom to top):
 colors = {
-    'CAPEX annuity': 'rgb(0.4, 0.4, 0.4)',
-    'Additional OPEX': 'rgb(0.7, 0.7, 0.7)',
-    'Iron Ore': pl.colors.qualitative.Dark24[3],
-    'DRI-Pellets': pl.colors.qualitative.Dark24[4],
-    'Scrap Steel': pl.colors.qualitative.Dark24[14],
-    'Naphta': pl.colors.qualitative.Dark24[17],
-    'Coking Coal': pl.colors.qualitative.Dark24[16],
-    'Injection Coal': pl.colors.qualitative.Dark24[6],
-    'Natural Gas': pl.colors.qualitative.Dark24[13],
-    'Hydrogen': pl.colors.qualitative.Dark24[0],
-    'Electricity': pl.colors.qualitative.Dark24[2],
-    'Effective CO2 Price': 'rgb(0.2, 0.2, 0.2)',
-    'CO2 Cost': 'rgb(0.2, 0.2, 0.2)',
+    # 1. FINANCIALS & EMISSIONS (Gray)
+    'CO2 Cost': '#333333',              # Dark Grey
+    'Effective CO2 Price': '#333333',   # Dark Grey
+    'CAPEX annuity': '#666666',         # Mid-Grey
+    'Additional OPEX': '#B3B3B3',       # Light Grey
+    
+    # 2. FEEDSTOCK INPUTS
+    'Iron Ore': '#A04000',
+    'DRI-Pellets': "#C0703B",
+    'Scrap Steel': "#68839E",
+
+    # 3. ENERGY & CARBON INPUTS
+    'Coking Coal': '#42032E',
+    'Injection Coal': "#5E3360",
+    'Naphta': '#E67E22',
+    'Biomass': '#229954',
+    'Natural Gas': '#2980B9',
+    'Hydrogen': '#00BCD4',
+    'Electricity': '#F1C40F',
 }
 
-
 def plot_stacked_bars_multi(projects: pd.DataFrame, config: dict, project_names: list[str],
-                      project_ref: str = None, cost_per: str = 'product', is_diff: bool = False, 
-                      emission_diff: bool = True):
+                      project_ref: str = None, cost_per: str = 'product',
+                      emission_diff: bool = False, export_csv: bool = False, csv_dir: str = None):
     """
     Plot stacked bar charts for multiple projects and a single reference.
     
@@ -43,10 +48,12 @@ def plot_stacked_bars_multi(projects: pd.DataFrame, config: dict, project_names:
         If None, no reference is shown.
     cost_per : str
         'product' or 'em_savings' to determine the y-axis unit
-    is_diff : bool
-        If True, plot the difference between project and reference
     emission_diff : bool
-        If True, handle emission costs as differences only
+        If True, plot co2 costs difference on the reference bar.
+    export_csv : bool
+        If True, export the data used for plotting to a CSV file.
+    csv_dir : str
+        Directory to save the CSV file if export_csv is True. If None, saves to current directory.
     """
     if cost_per == 'product':
         yunit = '€/t Produkt'
@@ -74,23 +81,17 @@ def plot_stacked_bars_multi(projects: pd.DataFrame, config: dict, project_names:
         projects = projects.assign(**{
             co2pricename + '_ref': lambda df: df['Effective CO2 Price'] * -df['Emissions_diff'],
             co2pricename: 0.})
-        dn_override = dn
     else:
         projects = projects.assign(**{
             co2pricename + '_ref': lambda df: df['CO2 Price'] * (df['Emissions_ref'] - df['Free Allocations_ref']),
             co2pricename: lambda df: df['CO2 Price'] * (df['Emissions'] - df['Free Allocations'])
         })
 
-        # override display name for CO2 Cost
-        dn_map = {'CO2 Cost': 'CO₂-Kosten'}
-        def dn_override(vn):
-            return dn_map.get(vn, dn(vn))
-
     variables = ['CAPEX annuity', 'Additional OPEX'] \
         + [cn for cn in projects.columns if str(cn).startswith('cost_')
            and not str(cn).endswith(('_variance', '_diff', '_ref', '_upper', '_lower'))]
-    if not is_diff:
-        variables.append(co2pricename)
+
+    variables.append(co2pricename)
 
     if cost_per == 'em_savings':
         for vn in variables:
@@ -103,8 +104,45 @@ def plot_stacked_bars_multi(projects: pd.DataFrame, config: dict, project_names:
     width = 0.9
     fig = pl.graph_objs.Figure()
 
+    # Export CSV if requested (for all projects, only columns that are plotted)
+    if export_csv:
+        # Only include _ref columns for the reference project, and normal columns for the others
+        export_rows = []
+        for pname in project_names:
+            df_proj = projects[projects['Project name'] == pname]
+            if not df_proj.empty:
+                row = df_proj[['Project name', 'Period'] + variables].copy()
+                export_rows.append(row)
+        if project_ref is not None:
+            df_ref = projects[projects['Project name'] == project_ref]
+            if not df_ref.empty:
+                ref_cols = ['Project name', 'Period'] + [vn + '_ref' for vn in variables]
+                row = df_ref[ref_cols].copy()
+                row['Project name'] = 'Referenz'
+                # Rename _ref columns to match normal variable names for clarity
+                row = row.rename(columns={vn + '_ref': vn for vn in variables})
+                export_rows.append(row)
+        if export_rows:
+            export_df = pd.concat(export_rows, ignore_index=True)
+            filename = f'stacked_bars_multi_{len(project_names)}_projects'
+            if project_ref is not None:
+                filename += f'_ref_{project_ref}'
+            filename += '.csv'
+            if csv_dir is not None:
+                filename = os.path.join(csv_dir, filename)
+            export_df.to_csv(filename, index=False)
+
     def yzero():
         return 0. * projects['CAPEX annuity']
+
+    class Bar():
+        def __init__(self, name, projects: pd.DataFrame, linecolor=None, reversed=False, base=None):
+            self.name = name
+            self.projects = projects
+            self.vnames = set(self.projects.columns) - {'Period'}
+            self.linecolor = linecolor
+            self.dir = -1 if reversed else 1
+            self.base = yzero() if base is None else base
 
     def add_placeholder(id: int):
         fig.add_bar(
@@ -127,7 +165,6 @@ def plot_stacked_bars_multi(projects: pd.DataFrame, config: dict, project_names:
         ref_data = projects.query(f"`Project name` == '{project_ref}'")
 
         if not ref_data.empty:
-            # Helper function to create zero base
             def yzero():
                 return 0. * ref_data['CAPEX annuity']
 
@@ -136,47 +173,45 @@ def plot_stacked_bars_multi(projects: pd.DataFrame, config: dict, project_names:
                 .filter(['Period'] + [vn + '_ref' for vn in variables]) \
                 .rename(columns=lambda cn: str(cn).replace('cost_', '').replace('_ref', ''))
 
-            class Bar():
-                def __init__(self, name, projects: pd.DataFrame, linecolor=None, reversed=False, base=None):
-                    self.name = name
-                    self.projects = projects
-                    self.vnames = set(self.projects.columns) - {'Period'}
-                    self.linecolor = linecolor
-                    self.dir = -1 if reversed else 1
-                    self.base = yzero() if base is None else base
-
             # Create reference bar
             ref = Bar(name='Referenz',
                       projects=ref_projects,
-                      linecolor='rgb(0., 0., 0.)')
+                      linecolor='black')
 
             # Add reference bars
             for vn in ref.vnames:
                 if vn not in colors:
                     raise Exception(f"Variable {vn} not found in colors dict")
 
+            ref.pos_base = ref.base.copy()
+            ref.neg_base = ref.base.copy()
+
             for vn, color in list(colors.items())[::ref.dir]:
                 if vn not in ref.vnames:
                     continue
 
+                values = ref.dir * ref.projects[vn]
+                effective_base = ref.pos_base.where(values >= 0, ref.neg_base)
+
                 fig.add_bar(
-                    name=dn_override(vn),
+                    name=dn(vn),
                     x=[ref.projects['Period'].to_list(), [ref.name for _ in years]],
-                    y=ref.dir * ref.projects[vn],
-                    base=ref.base,
+                    y=values,
+                    base=effective_base,
                     marker_color=color,
                     width=width,
                     offsetgroup=offsetgroup,
                     showlegend=vn not in legend_vars
                 )
                 legend_vars.add(vn)
-                ref.base += ref.dir * ref.projects[vn]
+                ref.pos_base += values.clip(lower=0)
+                ref.neg_base += values.clip(upper=0)
 
             if ref.linecolor:
                 fig.add_scatter(
                     x=[ref.projects['Period'].to_list(), [ref.name for _ in years]],
-                    y=ref.base,
-                    mode='lines',
+                    y=ref.pos_base + ref.neg_base,
+                    mode='lines+markers',
                     line=dict(color=ref.linecolor, width=2, dash='solid'),
                     showlegend=False,
                 )
@@ -193,7 +228,6 @@ def plot_stacked_bars_multi(projects: pd.DataFrame, config: dict, project_names:
         if project_data.empty:
             continue
 
-        # Helper function to create zero base
         def yzero():
             return 0. * project_data['CAPEX annuity']
 
@@ -202,37 +236,15 @@ def plot_stacked_bars_multi(projects: pd.DataFrame, config: dict, project_names:
             .filter(['Period'] + variables) \
             .rename(columns=lambda cn: str(cn).replace('cost_', ''))
 
-        # Extract CO2 price data if needed for differential plotting
-        if is_diff and emission_diff:
-            projects_co2price = project_data \
-                .filter(['Period', co2pricename + '_ref']) \
-                .rename(columns={co2pricename + '_ref': co2pricename})
-
-        class Bar():
-            def __init__(self, name, projects: pd.DataFrame, linecolor=None, reversed=False, base=None):
-                self.name = name
-                self.projects = projects
-                self.vnames = set(self.projects.columns) - {'Period'}
-                self.linecolor = linecolor
-                self.dir = -1 if reversed else 1
-                self.base = yzero() if base is None else base
-
         # Project name for display in the plot
         display_project_name = dn(project_name)
 
         # Create project bar
         new = Bar(name=f'{display_project_name}',
                   projects=projects_new,
-                  linecolor=pl.colors.qualitative.Dark24[10])
+                  linecolor='#D81B60')
 
         bars = [new]
-
-        # Add CO2 bar if using differential emissions
-        if is_diff and emission_diff:
-            co2 = Bar(name=f'CO2: {display_project_name}',
-                      projects=projects_co2price,
-                      linecolor='rgb(0., 0., 0.)')
-            bars.append(co2)
 
         # Add bars for each project
         for bar in bars:
@@ -240,31 +252,38 @@ def plot_stacked_bars_multi(projects: pd.DataFrame, config: dict, project_names:
                 if vn not in colors:
                     raise Exception(f"Variable {vn} not found in colors dict")
 
+            bar.pos_base = bar.base.copy()
+            bar.neg_base = bar.base.copy()
+
             for vn, color in list(colors.items())[::bar.dir]:
                 if vn not in bar.vnames:
                     continue
 
                 # For multi-project, we'll add the project name to the bar name for clarity
-                display_name = f"{dn_override(vn)} ({bar.name})" if vn in legend_vars else dn_override(vn)
+                display_name = f"{dn(vn)} ({bar.name})" if vn in legend_vars else dn(vn)
+
+                values = bar.dir * bar.projects[vn]
+                effective_base = bar.pos_base.where(values >= 0, bar.neg_base)
 
                 fig.add_bar(
                     name=display_name,
                     x=[bar.projects['Period'].to_list(), [bar.name for _ in years]],
-                    y=bar.dir * bar.projects[vn],
-                    base=bar.base,
+                    y=values,
+                    base=effective_base,
                     marker_color=color,
                     width=width,
                     offsetgroup=offsetgroup,
                     showlegend=vn not in legend_vars
                 )
                 legend_vars.add(vn)
-                bar.base += bar.dir * bar.projects[vn]
+                bar.pos_base += values.clip(lower=0)
+                bar.neg_base += values.clip(upper=0)
 
             if bar.linecolor:
                 fig.add_scatter(
                     x=[bar.projects['Period'].to_list(), [bar.name for _ in years]],
-                    y=bar.base,
-                    mode='lines',
+                    y=bar.pos_base + bar.neg_base,
+                    mode='lines+markers',
                     line=dict(color=bar.linecolor, width=2, dash='solid'),
                     showlegend=False,
                 )
@@ -290,7 +309,7 @@ def plot_stacked_bars_multi(projects: pd.DataFrame, config: dict, project_names:
     show_and_save(fig, config, filename)
 
 def plot_stacked_bars(projects: pd.DataFrame, config: dict, project_name: str,
-                      cost_per: str = 'product', is_diff: bool = False, emission_diff: bool = True):
+                      cost_per: str = 'product', emission_diff: bool = False, export_csv: bool = False, csv_dir: str = None):
 
     if cost_per == 'product':
         yunit = '€/t Produkt'
@@ -314,7 +333,6 @@ def plot_stacked_bars(projects: pd.DataFrame, config: dict, project_name: str,
         projects = projects.assign(**{
             co2pricename + '_ref': lambda df: df['Effective CO2 Price'] * -df['Emissions_diff'],
             co2pricename: 0.})
-        dn_override = dn
     else:
         # Emission cost: plotted for both project and reference
         projects = projects.assign(**{
@@ -322,16 +340,11 @@ def plot_stacked_bars(projects: pd.DataFrame, config: dict, project_name: str,
             co2pricename: lambda df: df['CO2 Price'] * (df['Emissions'] - df['Free Allocations'])
         })
 
-        # override display name for CO2 Cost
-        dn_map = {'CO2 Cost': 'CO₂-Kosten'}
-        def dn_override(vn):
-            return dn_map.get(vn, dn(vn))
-
     variables = ['CAPEX annuity', 'Additional OPEX'] \
         + [cn for cn in projects.columns if str(cn).startswith('cost_')
            and not str(cn).endswith(('_variance', '_diff', '_ref', '_upper', '_lower'))]
-    if not is_diff:
-        variables.append(co2pricename)
+
+    variables.append(co2pricename)
 
     if cost_per == 'em_savings':
         for vn in variables:
@@ -342,6 +355,16 @@ def plot_stacked_bars(projects: pd.DataFrame, config: dict, project_name: str,
     variables = [vn for vn in variables if max(pmax[vn], pmax[vn + '_ref']) > 1.e-6]
 
     width = 0.9
+
+    # Export CSV if requested (only columns that are plotted)
+    if export_csv:
+        export_cols = ['Project name', 'Period'] + variables + [vn + '_ref' for vn in variables]
+        export_df = projects[export_cols].copy()
+        export_df = export_df.loc[:, (export_df != 0).any(axis=0)]
+        filename = f'stacked_bars_{project_name}.csv'
+        if csv_dir is not None:
+            filename = os.path.join(csv_dir, filename)
+        export_df.to_csv(filename, index=False)
 
     fig = pl.graph_objs.Figure()
 
@@ -369,9 +392,6 @@ def plot_stacked_bars(projects: pd.DataFrame, config: dict, project_name: str,
     projects_ref = projects \
         .filter(['Period'] + [vn + '_ref' for vn in variables]) \
         .rename(columns=lambda cn: str(cn).replace('cost_', '').replace('_ref', ''))
-    projects_co2price = projects \
-        .filter(['Period', co2pricename + '_ref']) \
-        .rename(columns={co2pricename + '_ref': co2pricename})
 
     class Bar():
         def __init__(self, name, projects: pd.DataFrame, linecolor=None, reversed=False, base=None):
@@ -382,26 +402,13 @@ def plot_stacked_bars(projects: pd.DataFrame, config: dict, project_name: str,
             self.dir = -1 if reversed else 1
             self.base = yzero() if base is None else base
 
-    if not is_diff:
-        new = Bar(name='Vorhaben',
-                  projects=projects_new,
-                  linecolor=pl.colors.qualitative.Dark24[10])
-        ref = Bar(name='Referenz',
-                  projects=projects_ref,
-                  linecolor='rgb(0., 0., 0.)')
-        bars = [new, ref]
-    else:
-        new = Bar(name='Vorhaben',
-                  projects=projects_new)
-        ref = Bar(name='Referenz',
-                  projects=projects_ref,
-                  linecolor=pl.colors.qualitative.Dark24[10],
-                  reversed=True,
-                  base=new.base)
-        co2 = Bar(name='CO2-Preis',
-                  projects=projects_co2price,
-                  linecolor='rgb(0., 0., 0.)')
-        bars = [new, ref, co2]
+    new = Bar(name='Vorhaben',
+                projects=projects_new,
+                linecolor='#D81B60')
+    ref = Bar(name='Referenz',
+                projects=projects_ref,
+                linecolor='black')
+    bars = [new, ref]
 
     for bar in bars:
 
@@ -409,28 +416,35 @@ def plot_stacked_bars(projects: pd.DataFrame, config: dict, project_name: str,
             if vn not in colors:
                 raise Exception(f"Variable {vn} not found in colors dict")
 
+        bar.pos_base = bar.base.copy()
+        bar.neg_base = bar.base.copy()
+
         for vn, color in list(colors.items())[::bar.dir]:
 
             if vn not in bar.vnames:
                 continue
 
+            values = bar.dir * bar.projects[vn]
+            effective_base = bar.pos_base.where(values >= 0, bar.neg_base)
+
             fig.add_bar(
-                name=dn_override(vn),
+                name=dn(vn),
                 x=[bar.projects['Period'].to_list(), [bar.name for _ in years]],
-                y=bar.dir * bar.projects[vn],
-                base=bar.base,
+                y=values,
+                base=effective_base,
                 marker_color=color,
                 width=width,
                 showlegend=vn not in legend_vars
             )
             legend_vars.add(vn)
-            bar.base += bar.dir * bar.projects[vn]
+            bar.pos_base += values.clip(lower=0)
+            bar.neg_base += values.clip(upper=0)
 
         if bar.linecolor:
             fig.add_scatter(
                 x=[bar.projects['Period'].to_list(), [bar.name for _ in years]],
-                y=bar.base,
-                mode='lines',
+                y=bar.pos_base + bar.neg_base,
+                mode='lines+markers',
                 line=dict(color=bar.linecolor, width=2, dash='solid'),
                 showlegend=False,
             )

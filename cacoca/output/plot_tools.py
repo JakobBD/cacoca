@@ -78,7 +78,7 @@ display_names = {
     'Coking Coal': 'Kokskohle',
     'H2 Share': 'Anteil Wasserstoff',
     'all_projects': 'Alle Projekte',
-    'CO2 Cost': 'Emissionskostendiff. (ETS)',
+    'CO2 Cost': 'CO₂ Emissionskosten (ETS)',
     '': '',
     '': ''
 }
