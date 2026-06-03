@@ -10,7 +10,7 @@ project_names:
 
 show_figures: true
 show_figs_in_browser: true
-save_figures: false
+save_figures: true
 crop_figures: true
 output_dir: output/plot_slides_posted
 filename_prefix: cement

@@ -1,6 +1,18 @@
 import plotly as pl
 import pandas as pd
 import os
+# import sys
+
+# if sys.platform == "win32":
+#     try:
+#         import kaleido as _kaleido
+#         _kaleido_exec_dir = os.path.join(
+#             os.path.dirname(_kaleido.__file__), "executable"
+#         )
+#         if os.path.isdir(_kaleido_exec_dir):
+#             os.environ["PATH"] = _kaleido_exec_dir + os.pathsep + os.environ.get("PATH", "")
+#     except ImportError:
+#         pass
 
 
 # define colors to use
