@@ -173,7 +173,7 @@ def calc_cost_single_opmode(yearly_data: pd.DataFrame, setup: Setup, keep_compon
             on=['Technology', 'Component']
         ) \
         .rename(columns={"Value": "Material demand"})
-    yearly_data["Material demand"].fillna(0., inplace=True)
+    yearly_data["Material demand"] = yearly_data["Material demand"].fillna(0.0)
 
     # add prices to df and calculate cost = en.demand * price
     yearly_data = yearly_data \
@@ -222,7 +222,7 @@ def calc_cost_single_opmode(yearly_data: pd.DataFrame, setup: Setup, keep_compon
             on=['Technology']
         ) \
         .rename(columns={"Value": "Additional OPEX"})
-    yearly_data["Additional OPEX"].fillna(0., inplace=True)
+    yearly_data["Additional OPEX"] = yearly_data["Additional OPEX"].fillna(0.0)
     return yearly_data
 
 
@@ -258,7 +258,9 @@ def calc_emissions_single_opmode(yearly_data: pd.DataFrame, setup: Setup):
             how='left',
             on=['Technology', 'Period']
         )
-    yearly_data["Free Allocations"].fillna(0., inplace=True)
+    yearly_data["Free Allocations"] = pd.to_numeric(
+        yearly_data["Free Allocations"], errors='coerce'
+    ).fillna(0.0)
 
     return yearly_data
 

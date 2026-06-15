@@ -13,17 +13,33 @@ colors = {
     'Effective CO2 Price': '#333333',   # Dark Grey
     'CAPEX annuity': '#666666',         # Mid-Grey
     'Additional OPEX': '#B3B3B3',       # Light Grey
-    
+    'OM Fixed': '#7F8C8D',              # Grey-green (TEAM)
+    'OM Variable': '#95A5A6',           # Light grey-green (TEAM)
+
     # 2. FEEDSTOCK INPUTS
     'Iron Ore': '#A04000',
     'DRI-Pellets': "#C0703B",
     'Scrap Steel': "#68839E",
+    'Direct Reduced Iron': '#8D6E63',
+    'Steel Liquid': '#7F8FA6',
+    'Steel Slab': '#A4B0BE',
+    'Steel Hot-rolled Coil': '#BCC7D4',
+    'Alloys': '#B5651D',
+    'Graphite Electrode': '#424242',
+    'Lime': '#CFCFC4',
+    'Nitrogen': '#5DADE2',
+    'Water': '#3498DB',
+    'Captured CO2': '#16A085',
 
     # 3. ENERGY & CARBON INPUTS
     'Coking Coal': '#42032E',
     'Injection Coal': "#5E3360",
+    'Coal': '#1A252F',                  # Generic coal (TEAM)
+    'Oxygen': '#8B4513',                # Saddle brown (TEAM)
+    'Heat': '#F39C12',
     'Naphta': '#E67E22',
     'Biomass': '#229954',
+    'Biomethane': '#1ABC9C',            # Teal (TEAM)
     'Natural Gas': '#2980B9',
     'Hydrogen': '#00BCD4',
     'Electricity': '#F1C40F',
@@ -78,14 +94,22 @@ def plot_stacked_bars_multi(projects: pd.DataFrame, config: dict, project_names:
 
     # Process CO2 price data
     if emission_diff:
-        projects = projects.assign(**{
-            co2pricename + '_ref': lambda df: df['Effective CO2 Price'] * -df['Emissions_diff'],
-            co2pricename: 0.})
+        if project_ref is not None:
+            projects = projects.assign(**{
+                co2pricename + '_ref': lambda df: df['Effective CO2 Price'] * -df['Emissions_diff'],
+                co2pricename: 0.})
+        else:
+            projects = projects.assign(**{co2pricename: 0.})
     else:
-        projects = projects.assign(**{
-            co2pricename + '_ref': lambda df: df['CO2 Price'] * (df['Emissions_ref'] - df['Free Allocations_ref']),
-            co2pricename: lambda df: df['CO2 Price'] * (df['Emissions'] - df['Free Allocations'])
-        })
+        if project_ref is not None:
+            projects = projects.assign(**{
+                co2pricename + '_ref': lambda df: df['CO2 Price'] * (df['Emissions_ref'] - df['Free Allocations_ref']),
+                co2pricename: lambda df: df['CO2 Price'] * (df['Emissions'] - df['Free Allocations'])
+            })
+        else:
+            projects = projects.assign(**{
+                co2pricename: lambda df: df['CO2 Price'] * (df['Emissions'] - df['Free Allocations'])
+            })
 
     variables = ['CAPEX annuity', 'Additional OPEX'] \
         + [cn for cn in projects.columns if str(cn).startswith('cost_')
@@ -96,10 +120,14 @@ def plot_stacked_bars_multi(projects: pd.DataFrame, config: dict, project_names:
     if cost_per == 'em_savings':
         for vn in variables:
             projects[vn] /= -projects['Emissions_diff']
-            projects[vn + '_ref'] /= -projects['Emissions_diff']
+            if project_ref is not None:
+                projects[vn + '_ref'] /= -projects['Emissions_diff']
 
     pmax = projects.max()
-    variables = [vn for vn in variables if max(pmax[vn], pmax[vn + '_ref']) > 1.e-6]
+    if project_ref is not None:
+        variables = [vn for vn in variables if max(pmax[vn], pmax[vn + '_ref']) > 1.e-6]
+    else:
+        variables = [vn for vn in variables if pmax[vn] > 1.e-6]
 
     width = 0.9
     fig = pl.graph_objs.Figure()

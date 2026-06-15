@@ -1,5 +1,0 @@
-Technology,Mode,Type,Component,Subcomponent,Region,Period,Usage,Value,Uncertainty,Unit,Non-unit conversion factor,Value and uncertainty comment,Source reference,Source comment
-Steel Casting,,High CAPEX,CAPEX,,,2025,,41.26,,USD_2005,,,Posted Tech|Steel Casting,
-Steel Casting,,Energy demand,Electricity,,,2025,,0.009317,,MWh,,,Posted Tech|Steel Casting,
-Steel Casting,,Energy demand,Heat,,,2025,,0.007222,,MWh,,,Posted Tech|Steel Casting,
-Steel Casting,,Feedstock demand,Steel Liquid,,,2025,,1.032,,t,,,Posted Tech|Steel Casting,

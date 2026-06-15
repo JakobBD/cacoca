@@ -1,5 +1,0 @@
-Technology,Mode,Type,Component,Subcomponent,Region,Period,Usage,Value,Uncertainty,Unit,Non-unit conversion factor,Value and uncertainty comment,Source reference,Source comment
-Steel Hot Rolling,,High CAPEX,CAPEX,,,2025,,102.4,,USD_2005,,,Posted Tech|Steel Hot Rolling,
-Steel Hot Rolling,,Energy demand,Electricity,,,2025,,0.09432,,MWh,,,Posted Tech|Steel Hot Rolling,
-Steel Hot Rolling,,Energy demand,Heat,,,2025,,0.4147,,MWh,,,Posted Tech|Steel Hot Rolling,
-Steel Hot Rolling,,Feedstock demand,Steel Slab,,,2025,,1.053,,t,,,Posted Tech|Steel Hot Rolling,

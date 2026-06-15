@@ -1,9 +1,0 @@
-Technology,Mode,Type,Component,Subcomponent,Region,Period,Usage,Value,Uncertainty,Unit,Non-unit conversion factor,Value and uncertainty comment,Source reference,Source comment
-Standard,,High CAPEX,CAPEX,,,2025,,381.6,,USD_2005,,,Posted Tech|Coal Gasification,
-Standard,,Energy demand,Coal,,,2025,,1460.0,,MWh,,,Posted Tech|Coal Gasification,
-Standard,,Energy demand,Electricity,,,2025,,0.02728,,MWh,,,Posted Tech|Coal Gasification,
-w/ CC (92.5%),,High CAPEX,CAPEX,,,2025,,439.8,,USD_2005,,,Posted Tech|Coal Gasification,
-w/ CC (92.5%),,Energy demand,Coal,,,2025,,1460.0,,MWh,,,Posted Tech|Coal Gasification,
-w/ CC (92.5%),,Energy demand,Electricity,,,2025,,0.04255,,MWh,,,Posted Tech|Coal Gasification,
-Standard,,OPEX,Additional OPEX,,,2025,,20.37,,USD_2005,,,Posted Tech|Coal Gasification,
-w/ CC (92.5%),,OPEX,Additional OPEX,,,2025,,12.3311,,USD_2005,,,Posted Tech|Coal Gasification,

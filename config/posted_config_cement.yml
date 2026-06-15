@@ -1,0 +1,27 @@
+default_wacc: 0.08
+book_lifetime: 25
+
+routes_file: config/posted_routes_cement.yml
+project_names:
+  - Cement-Baseline
+  - Cement-Tail20
+  - Cement-Tail50
+  - Cement-IntCaL
+
+show_figures: true
+show_figs_in_browser: true
+save_figures: true
+crop_figures: true
+output_dir: output/plot_slides_posted
+filename_prefix: cement
+
+scenarios_dir: data/scenarios/basic/
+scenarios_actual:
+  free_allocations: 'base_allocation'
+  prices:
+    Electricity: 'EEX Jahresfuture_DE'
+    CO2: 'PIKExpertGuess-CO2'
+    Coal: '100 steady'
+    Oxygen: '20 steady'
+    Captured CO2: 'Zero_Dummy_CapturedCO2'
+    Cement: 'Zero_Dummy_Cement'
