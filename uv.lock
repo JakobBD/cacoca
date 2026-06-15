@@ -65,9 +65,9 @@ requires-dist = [
     { name = "openpyxl", specifier = ">=3.1.2,<4.0.0" },
     { name = "pandas", specifier = ">=1.5.3" },
     { name = "plotly", specifier = ">=5.13.1,<6.0.0" },
-    { name = "posted", git = "https://github.com/PhilippVerpoort/posted" },
+    { name = "posted", git = "https://github.com/PhilippVerpoort/posted?tag=v0.5.3" },
     { name = "pyyaml", specifier = ">=6.0,<7.0" },
-    { name = "team", git = "https://github.com/PhilippVerpoort/team.git" },
+    { name = "team", git = "https://github.com/PhilippVerpoort/team.git?rev=15187b34e67c24e13f93db66e12635ab258adcf7" },
 ]
 provides-extras = ["dev"]
 
@@ -541,8 +541,8 @@ wheels = [
 
 [[package]]
 name = "posted"
-version = "0.5.1"
-source = { git = "https://github.com/PhilippVerpoort/posted#7d3832e58fd4f689e2c2457906dda5cc11f9c22f" }
+version = "0.5.3"
+source = { git = "https://github.com/PhilippVerpoort/posted?tag=v0.5.3#e33e516538335d6c93a236b81289b5c85f3df4fe" }
 dependencies = [
     { name = "cet-units" },
     { name = "numpy" },
@@ -796,7 +796,7 @@ wheels = [
 [[package]]
 name = "team"
 version = "0.1.0"
-source = { git = "https://github.com/PhilippVerpoort/team.git#15187b34e67c24e13f93db66e12635ab258adcf7" }
+source = { git = "https://github.com/PhilippVerpoort/team.git?rev=15187b34e67c24e13f93db66e12635ab258adcf7#15187b34e67c24e13f93db66e12635ab258adcf7" }
 dependencies = [
     { name = "cet-units" },
     { name = "pandas" },

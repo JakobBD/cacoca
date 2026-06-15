@@ -32,5 +32,5 @@ build-backend = "hatchling.build"
 packages = ["cacoca", "posted_coupling"]
 
 [tool.uv.sources]
-posted = { git = "https://github.com/PhilippVerpoort/posted" }
-team = { git = "https://github.com/PhilippVerpoort/team.git" }
+posted = { git = "https://github.com/PhilippVerpoort/posted", tag = "v0.5.3" }
+team = { git = "https://github.com/PhilippVerpoort/team.git", rev = "15187b34e67c24e13f93db66e12635ab258adcf7" }
