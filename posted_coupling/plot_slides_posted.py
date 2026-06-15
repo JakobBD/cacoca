@@ -15,7 +15,6 @@ from posted import TEDF
 
 from cacoca.setup.read_input import read_config
 from cacoca.output.plot_stacked_bars import plot_stacked_bars_multi
-from cacoca.output.plot_price_scenarios import plot_price_scenarios
 
 from posted_coupling.routes import load_routes, calc_posted_routes
 
